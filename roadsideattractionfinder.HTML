@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadside Attractions USA - Your Road Trip Adventure Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 120px);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+        }
+
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .map-container {
+            flex: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .custom-popup {
+            font-family: Arial, sans-serif;
+        }
+
+        .popup-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-category {
+            background: #667eea;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-description {
+            color: #666;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .popup-address {
+            color: #888;
+            font-size: 0.9rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .popup-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .directions-btn {
+            background: #4285f4;
+            color: white;
+        }
+
+        .directions-btn:hover {
+            background: #3367d6;
+        }
+
+        .copy-btn {
+            background: #34a853;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: #2d8f47;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+                max-height: 300px;
+            }
+            
+            .map-container {
+                height: 50vh;
+                order: 1;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🛣️ Roadside Attractions USA</h1>
+        <p>Discover quirky stops and hidden gems for your next road trip adventure!</p>
+    </header>
+
+    <div class="error-message" id="errorMessage">
+        Failed to load the map. Please refresh the page or check your internet connection.
+    </div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="search-section">
+                <h3>🔍 Search Attractions</h3>
+                <input type="text" class="search-input" placeholder="Search by name or location..." id="searchInput">
+            </div>
+
+            <div class="filter-section">
+                <h3>📍 Filter by Category</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="worlds-largest">World's Largest</button>
+                    <button class="filter-btn" data-category="quirky">Quirky Museums</button>
+                    <button class="filter-btn" data-category="roadside-giants">Roadside Giants</button>
+                    <button class="filter-btn" data-category="natural-wonders">Natural Wonders</button>
+                    <button class="filter-btn" data-category="historic">Historic Sites</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <h3>📊 Trip Stats</h3>
+                <p><span id="attractionCount">0</span> attractions discovered</p>
+                <p><span id="visibleCount">0</span> currently visible</p>
+            </div>
+        </aside>
+
+        <main class="map-container">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        (function() {
+            'use strict';
+            
+            // Global variables
+            let map = null;
+            let markers = [];
+            let currentFilter = 'all';
+
+            // Attractions data
+            const attractions = [
+                {
+                    name: "World's Largest Ball of Twine",
+                    lat: 39.3704,
+                    lng: -98.1340,
+                    category: "worlds-largest",
+                    description: "A massive ball of twine that took 27 years to create, weighing over 17,000 pounds!",
+                    address: "301 Locust St, Cawker City, KS 67430",
+                    city: "Cawker City",
+                    state: "Kansas"
+                },
+                {
+                    name: "Cadillac Ranch",
+                    lat: 35.1872,
+                    lng: -101.9871,
+                    category: "quirky",
+                    description: "Ten vintage Cadillacs buried nose-first in the ground, covered in graffiti art.",
+                    address: "I-40 Frontage Rd, Amarillo, TX 79124",
+                    city: "Amarillo",
+                    state: "Texas"
+                },
+                {
+                    name: "World's Largest Thermometer",
+                    lat: 35.1457,
+                    lng: -115.5939,
+                    category: "worlds-largest",
+                    description: "A 134-foot tall thermometer commemorating the hottest temperature recorded in the US.",
+                    address: "72157 Baker Blvd, Baker, CA 92309",
+                    city: "Baker",
+                    state: "California"
+                },
+                {
+                    name: "Corn Palace",
+                    lat: 43.7391,
+                    lng: -98.0298,
+                    category: "quirky",
+                    description: "A building decorated entirely with corn murals, redecorated annually since 1892.",
+                    address: "604 N Main St, Mitchell, SD 57301",
+                    city: "Mitchell",
+                    state: "South Dakota"
+                },
+                {
+                    name: "Paul Bunyan Statue",
+                    lat: 47.2368,
+                    lng: -94.8786,
+                    category: "roadside-giants",
+                    description: "A 26-foot tall statue of the legendary lumberjack Paul Bunyan and his blue ox Babe.",
+                    address: "300 Bemidji Ave N, Bemidji, MN 56601",
+                    city: "Bemidji",
+                    state: "Minnesota"
+                },
+                {
+                    name: "Carhenge",
+                    lat: 42.1411,
+                    lng: -103.3067,
+                    category: "quirky",
+                    description: "A replica of Stonehenge made entirely from vintage American automobiles.",
+                    address: "2151 County Rd 59, Alliance, NE 69301",
+                    city: "Alliance",
+                    state: "Nebraska"
+                },
+                {
+                    name: "Giant Sequoia Drive-Through Tree",
+                    lat: 39.4892,
+                    lng: -123.8067,
+                    category: "natural-wonders",
+                    description: "Drive your car through a living 2,400-year-old giant sequoia tree!",
+                    address: "13078 Avenue of the Giants, Myers Flat, CA 95554",
+                    city: "Myers Flat",
+                    state: "California"
+                },
+                {
+                    name: "Lucy the Elephant",
+                    lat: 39.3218,
+                    lng: -74.5107,
+                    category: "roadside-giants",
+                    description: "A six-story elephant-shaped building that's been a Jersey Shore landmark since 1881.",
+                    address: "9200 Atlantic Ave, Margate City, NJ 08402",
+                    city: "Margate City",
+                    state: "New Jersey"
+                },
+                {
+                    name: "Giant Blue Whale",
+                    lat: 35.7796,
+                    lng: -95.9023,
+                    category: "roadside-giants",
+                    description: "An 80-foot long blue whale sculpture that's been a Route 66 favorite since 1972.",
+                    address: "2680 N Hwy 66, Catoosa, OK 74015",
+                    city: "Catoosa",
+                    state: "Oklahoma"
+                },
+                {
+                    name: "World's Largest Buffalo",
+                    lat: 46.8136,
+                    lng: -103.6571,
+                    category: "worlds-largest",
+                    description: "A 26-foot tall, 60-ton concrete buffalo overlooking the Badlands.",
+                    address: "500 17th St SE, Jamestown, ND 58401",
+                    city: "Jamestown",
+                    state: "North Dakota"
+                },
+                {
+                    name: "Salvation Mountain",
+                    lat: 33.2549,
+                    lng: -115.4710,
+                    category: "quirky",
+                    description: "A colorful art installation in the desert made from adobe clay and thousands of gallons of paint.",
+                    address: "Beal Rd, Niland, CA 92257",
+                    city: "Slab City",
+                    state: "California"
+                },
+                {
+                    name: "Giant Coffee Pot",
+                    lat: 39.6403,
+                    lng: -79.9553,
+                    category: "roadside-giants",
+                    description: "A 14-foot tall coffee pot-shaped building that once served travelers on the Lincoln Highway.",
+                    address: "300 S Juliana St, Bedford, PA 15522",
+                    city: "Bedford",
+                    state: "Pennsylvania"
+                },
+                {
+                    name: "Dinosaur Park",
+                    lat: 44.0805,
+                    lng: -103.2278,
+                    category: "historic",
+                    description: "Life-sized concrete dinosaur sculptures overlooking Rapid City since 1936.",
+                    address: "940 Skyline Dr, Rapid City, SD 57701",
+                    city: "Rapid City",
+                    state: "South Dakota"
+                },
+                {
+                    name: "Giant Uniroyal Tire",
+                    lat: 42.2162,
+                    lng: -83.2104,
+                    category: "roadside-giants",
+                    description: "An 80-foot tall tire that was originally a Ferris wheel at the 1964 World's Fair.",
+                    address: "12000 Southfield Rd, Allen Park, MI 48101",
+                    city: "Allen Park",
+                    state: "Michigan"
+                },
+                {
+                    name: "World's Largest Ketchup Bottle",
+                    lat: 38.7606,
+                    lng: -90.1994,
+                    category: "worlds-largest",
+                    description: "A 170-foot tall water tower shaped like a Brooks Catsup bottle.",
+                    address: "800 S Morrison Ave, Collinsville, IL 62234",
+                    city: "Collinsville",
+                    state: "Illinois"
+                },
+                {
+                    name: "House on the Rock",
+                    lat: 43.2361,
+                    lng: -90.1073,
+                    category: "natural-wonders",
+                    description: "An architectural marvel built on a 60-foot tall chimney of rock.",
+                    address: "5754 State Rd 23, Spring Green, WI 53588",
+                    city: "Spring Green",
+                    state: "Wisconsin"
+                }
+            ];
+
+            // Category icons
+            const categoryIcons = {
+                'worlds-largest': '🏆',
+                'quirky': '🎨',
+                'roadside-giants': '🗿',
+                'natural-wonders': '🌲',
+                'historic': '🏛️'
+            };
+
+            // Initialize the application
+            function init() {
+                try {
+                    // Check if Leaflet is available
+                    if (typeof L === 'undefined') {
+                        throw new Error('Leaflet library not loaded');
+                    }
+
+                    // Initialize map
+                    map = L.map('map').setView([39.8283, -98.5795], 4);
+                    
+                    // Add tile layer
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 18
+                    }).addTo(map);
+
+                    // Create markers
+                    createMarkers();
+                    
+                    // Set up event listeners
+                    setupEventListeners();
+                    
+                    // Update stats
+                    updateStats();
+
+                    console.log('Roadside Attractions app initialized successfully');
+                    
+                } catch (error) {
+                    console.error('Error initializing app:', error);
+                    showError();
+                }
+            }
+
+            // Create markers on the map
+            function createMarkers() {
+                attractions.forEach(function(attraction) {
+                    try {
+                        const iconEmoji = categoryIcons[attraction.category] || '📍';
+                        
+                        const icon = L.divIcon({
+                            html: '<div style="background: white; border: 3px solid #667eea; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">' + iconEmoji + '</div>',
+                            className: 'custom-marker',
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
+
+                        const categoryDisplay = attraction.category.replace(/-/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+                        
+                        const popupContent = '<div class="custom-popup">' +
+                            '<div class="popup-title">' + attraction.name + '</div>' +
+                            '<div class="popup-category">' + categoryDisplay + '</div>' +
+                            '<div class="popup-description">' + attraction.description + '</div>' +
+                            '<div class="popup-address">📍 ' + attraction.address + '</div>' +
+                            '<div class="popup-buttons">' +
+                                '<a href="https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(attraction.address) + '" target="_blank" class="popup-btn directions-btn">🗺️ Get Directions</a>' +
+                                '<button onclick="copyAddress(\'' + attraction.address.replace(/'/g, "\\'") + '\')" class="popup-btn copy-btn">📋 Copy Address</button>' +
+                            '</div>' +
+                            '</div>';
+
+                        const marker = L.marker([attraction.lat, attraction.lng], { icon: icon })
+                            .bindPopup(popupContent);
+
+                        marker.attractionData = attraction;
+                        markers.push(marker);
+                        marker.addTo(map);
+                        
+                    } catch (error) {
+                        console.error('Error creating marker for:', attraction.name, error);
+                    }
+                });
+            }
+
+            // Set up event listeners
+            function setupEventListeners() {
+                try {
+                    // Search input
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) {
+                        searchInput.addEventListener('input', function(e) {
+                            searchAttractions(e.target.value);
+                        });
+                    }
+
+                    // Filter buttons
+                    const filterButtons = document.querySelectorAll('.filter-btn');
+                    filterButtons.forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            filterButtons.forEach(function(b) { b.classList.remove('active'); });
+                            e.target.classList.add('active');
+                            filterAttractions(e.target.getAttribute('data-category'));
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('Error setting up event listeners:', error);
+                }
+            }
+
+            // Filter attractions by category
+            function filterAttractions(category) {
+                currentFilter = category;
+                markers.forEach(function(marker) {
+                    try {
+                        const shouldShow = category === 'all' || marker.attractionData.category === category;
+                        
+                        if (shouldShow && !map.hasLayer(marker)) {
+                            marker.addTo(map);
+                        } else if (!shouldShow && map.hasLayer(marker)) {
+                            map.removeLayer(marker);
+                        }
+                    } catch (error) {
+                        console.error('Error filtering marker:', error);
+                    }
+                });
+                updateStats();
+            }
+
+            // Search attractions
+            function searchAttractions(searchTerm) {
+                const term = searchTerm.toLowerCase();
+                
+                markers.forEach(function(marker) {
+                    try {
+                        const attraction = marker.attractionData;
+                        const matchesSearch = !term || 
+                            attraction.name.toLowerCase().indexOf(term) !== -1 ||
+                            attraction.address.toLowerCase().indexOf(term) !== -1 ||
+                            attraction.description.toLowerCase().indexOf(term) !== -1;
+                        
+                        const matchesFilter = currentFilter === 'all' || attraction.category === currentFilter;
+                        const shouldShow = matchesSearch && matchesFilter;
+
+                        if (shouldShow && !map.hasLayer(marker)) {
+                            marker.addTo(map);
+                        } else if (!shouldShow && map.hasLayer(marker)) {
+                            map.removeLayer(marker);
+                        }
+                    } catch (error) {
+                        console.error('Error searching marker:', error);
+                    }
+                });
+                updateStats();
+            }
+
+            // Update statistics display
+            function updateStats() {
+                try {
+                    const visibleMarkers = markers.filter(function(marker) {
+                        return map.hasLayer(marker);
+                    });
+                    
+                    const totalElement = document.getElementById('attractionCount');
+                    const visibleElement = document.getElementById('visibleCount');
+                    
+                    if (totalElement) totalElement.textContent = attractions.length;
+                    if (visibleElement) visibleElement.textContent = visibleMarkers.length;
+                } catch (error) {
+                    console.error('Error updating stats:', error);
+                }
+            }
+
+            // Show error message
+            function showError() {
+                const errorElement = document.getElementById('errorMessage');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            // Copy address to clipboard
+            window.copyAddress = function(address) {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(address).then(function() {
+                            alert('Address copied to clipboard: ' + address);
+                        });
+                    } else {
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = address;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        alert('Address copied to clipboard: ' + address);
+                    }
+                } catch (error) {
+                    console.error('Error copying address:', error);
+                    alert('Could not copy address. Please copy manually: ' + address);
+                }
+            };
+
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+</body>
+</html>
