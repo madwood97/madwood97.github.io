@@ -1,0 +1,936 @@
+// Add CSS for animations
+        var style = document.createElement('style');
+        style.textContent = `
+            @keyframes bookPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+            
+            .custom-book-marker:hover {
+                transform: scale(1.1);
+                transition: transform 0.2s ease;
+            }
+        `;
+        document.head.appendChild(style);<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Independent Bookstore Finder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e2db 100%);
+            color: #2c3e50;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .book-icon {
+            font-size: 1.5rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .search-btn {
+            padding: 0.75rem 1.5rem;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #e67e22;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .intro h2 {
+            color: #8b4513;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .intro p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        #mapid {
+            height: 600px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 3px solid #8b4513;
+            background: #e6f3ff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .map-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .control-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8b4513;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .status {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .search-container {
+                margin-top: 1rem;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            #mapid {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>
+                <span class="book-icon">📚</span>
+                Independent Bookstore Finder
+            </h1>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search by major city..." id="searchInput">
+                <button class="search-btn" onclick="performSearch()">Find Stores</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="intro">
+            <h2>Discover Your Local Literary Gems</h2>
+            <p>Explore independent bookstores across America, discover upcoming literary events, and support local businesses that keep our communities' love for books alive. Click on any marker to learn more about the bookstore, visit their website, or check out their latest events.</p>
+        </div>
+
+        <div class="status" id="status">Loading map...</div>
+
+        <div class="stats">
+            <h3>Supporting Independent Bookstores</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Featured Bookstores</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">With Current Events</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">States Covered</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-controls">
+            <button class="control-btn" onclick="showAllStores()">Show All Stores</button>
+            <button class="control-btn" onclick="findNearMe()">Find Near Me</button>
+            <button class="control-btn" onclick="showEventsOnly()">Events This Week</button>
+        </div>
+
+        <div id="mapid"></div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Independent Bookstore Finder | Supporting local literary communities across America</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        // Debug function
+        function updateStatus(message) {
+            console.log('Status:', message);
+            document.getElementById('status').textContent = message;
+        }
+
+        // Global variables
+        var mymap = null;
+        var markers = [];
+
+        // Bookstore data - Expanded collection of independent bookstores across America
+        var bookstores = [
+            // West Coast
+            {
+                name: "Powell's City of Books",
+                lat: 45.5230,
+                lng: -122.6814,
+                address: "1005 W Burnside St, Portland, OR 97209",
+                description: "The world's largest independent bookstore.",
+                website: "https://www.powells.com",
+                hasEvent: true,
+                eventTitle: "Author Reading Tonight",
+                eventDate: "7:00 PM"
+            },
+            {
+                name: "City Lights Bookstore",
+                lat: 37.7976,
+                lng: -122.4068,
+                address: "261 Columbus Ave, San Francisco, CA 94133",
+                description: "Historic Beat Generation landmark.",
+                website: "https://citylights.com",
+                hasEvent: true,
+                eventTitle: "Poetry Workshop",
+                eventDate: "Tomorrow 6:30 PM"
+            },
+            {
+                name: "Elliott Bay Book Company",
+                lat: 47.6011,
+                lng: -122.3190,
+                address: "1521 10th Ave, Seattle, WA 98122",
+                description: "Seattle's beloved independent bookstore on Capitol Hill.",
+                website: "https://www.elliottbaybook.com",
+                hasEvent: false
+            },
+            {
+                name: "Skylight Books",
+                lat: 34.0879,
+                lng: -118.2870,
+                address: "1818 N Vermont Ave, Los Angeles, CA 90027",
+                description: "Los Feliz neighborhood gem with curated selection.",
+                website: "https://www.skylightbooks.com",
+                hasEvent: false
+            },
+            {
+                name: "Book Passage",
+                lat: 37.8719,
+                lng: -122.5198,
+                address: "51 Tamal Vista Blvd, Corte Madera, CA 94925",
+                description: "Bay Area favorite known for travel books and author events.",
+                website: "https://bookpassage.com",
+                hasEvent: true,
+                eventTitle: "Travel Writing Workshop",
+                eventDate: "Saturday 2:00 PM"
+            },
+            {
+                name: "Mysterious Galaxy",
+                lat: 32.8328,
+                lng: -117.1573,
+                address: "5943 Balboa Ave, San Diego, CA 92111",
+                description: "Sci-fi and fantasy specialist bookstore.",
+                website: "https://www.mystgalaxy.com",
+                hasEvent: false
+            },
+            
+            // Southwest
+            {
+                name: "BookPeople",
+                lat: 30.2648,
+                lng: -97.7569,
+                address: "603 N Lamar Blvd, Austin, TX 78703",
+                description: "Austin's largest independent bookstore.",
+                website: "https://bookpeople.com",
+                hasEvent: true,
+                eventTitle: "Local Author Showcase",
+                eventDate: "Friday 8:00 PM"
+            },
+            {
+                name: "Changing Hands Bookstore",
+                lat: 33.4019,
+                lng: -111.9370,
+                address: "6428 S McClintock Dr, Tempe, AZ 85283",
+                description: "Arizona's premier independent bookstore.",
+                website: "https://www.changinghands.com",
+                hasEvent: false
+            },
+            {
+                name: "Collected Works Bookstore",
+                lat: 35.6870,
+                lng: -105.9378,
+                address: "202 Galisteo St, Santa Fe, NM 87501",
+                description: "Santa Fe's literary heart with regional focus.",
+                website: "https://collectedworksbookstore.com",
+                hasEvent: true,
+                eventTitle: "Southwest Authors Reading",
+                eventDate: "Thursday 7:00 PM"
+            },
+            {
+                name: "Murder by the Book",
+                lat: 29.7604,
+                lng: -95.3698,
+                address: "2342 Bissonnet St, Houston, TX 77005",
+                description: "Mystery bookstore specializing in crime fiction.",
+                website: "https://www.murderbooks.com",
+                hasEvent: false
+            },
+            
+            // Mountain West
+            {
+                name: "Tattered Cover Book Store",
+                lat: 39.7542,
+                lng: -104.9935,
+                address: "1628 16th St, Denver, CO 80202",
+                description: "Colorado's largest independent bookstore.",
+                website: "https://www.tatteredcover.com",
+                hasEvent: true,
+                eventTitle: "Children's Story Time",
+                eventDate: "Saturday 10:00 AM"
+            },
+            {
+                name: "The King's English Bookshop",
+                lat: 40.7128,
+                lng: -111.8910,
+                address: "1511 S 1500 E, Salt Lake City, UT 84105",
+                description: "Utah's premier independent bookstore since 1977.",
+                website: "https://www.kingsenglish.com",
+                hasEvent: false
+            },
+            
+            // Midwest
+            {
+                name: "Joseph-Beth Booksellers",
+                lat: 39.0661,
+                lng: -84.6047,
+                address: "2692 Madison Rd, Cincinnati, OH 45208",
+                description: "Comfortable reading spaces and author events.",
+                website: "https://www.josephbeth.com",
+                hasEvent: true,
+                eventTitle: "Mystery Book Discussion",
+                eventDate: "Sunday 2:00 PM"
+            },
+            {
+                name: "57th Street Books",
+                lat: 41.7886,
+                lng: -87.5987,
+                address: "1301 E 57th St, Chicago, IL 60637",
+                description: "University of Chicago's neighborhood bookstore.",
+                website: "https://www.semcoop.com",
+                hasEvent: false
+            },
+            {
+                name: "Magers & Quinn Booksellers",
+                lat: 44.9778,
+                lng: -93.2650,
+                address: "3038 Hennepin Ave, Minneapolis, MN 55408",
+                description: "Minneapolis institution with vast used book collection.",
+                website: "https://www.magersandquinn.com",
+                hasEvent: true,
+                eventTitle: "Local History Book Club",
+                eventDate: "Wednesday 6:00 PM"
+            },
+            {
+                name: "The Bookworm",
+                lat: 41.5868,
+                lng: -93.6250,
+                address: "2626 Beaver Ave, Des Moines, IA 50310",
+                description: "Des Moines' beloved community bookstore.",
+                website: "https://thebookwormdesmoines.com",
+                hasEvent: false
+            },
+            
+            // South
+            {
+                name: "Parnassus Books",
+                lat: 36.1189,
+                lng: -86.8068,
+                address: "3900 Hillsboro Pike, Nashville, TN 37215",
+                description: "Founded by author Ann Patchett.",
+                website: "https://www.parnassusbooks.net",
+                hasEvent: true,
+                eventTitle: "Southern Writers Circle",
+                eventDate: "Thursday 7:30 PM"
+            },
+            {
+                name: "Square Books",
+                lat: 34.3668,
+                lng: -89.5192,
+                address: "160 Courthouse Square, Oxford, MS 38655",
+                description: "Oxford's literary landmark near Ole Miss.",
+                website: "https://www.squarebooks.com",
+                hasEvent: false
+            },
+            {
+                name: "Avid Bookshop",
+                lat: 33.9519,
+                lng: -83.3576,
+                address: "493 Prince Ave, Athens, GA 30601",
+                description: "Athens' independent bookstore supporting local authors.",
+                website: "https://www.avidbookshop.com",
+                hasEvent: true,
+                eventTitle: "Georgia Authors Night",
+                eventDate: "Friday 7:00 PM"
+            },
+            {
+                name: "Malaprop's Bookstore",
+                lat: 35.5951,
+                lng: -82.5515,
+                address: "55 Haywood St, Asheville, NC 28801",
+                description: "Asheville's cultural hub and café.",
+                website: "https://www.malaprops.com",
+                hasEvent: false
+            },
+            {
+                name: "Garden District Book Shop",
+                lat: 29.9311,
+                lng: -90.0852,
+                address: "2727 Prytania St, New Orleans, LA 70130",
+                description: "New Orleans literary treasure in the Garden District.",
+                website: "https://www.gardendistrictbookshop.com",
+                hasEvent: true,
+                eventTitle: "Louisiana Literature Series",
+                eventDate: "Tuesday 6:30 PM"
+            },
+            
+            // Northeast
+            {
+                name: "The Strand Book Store",
+                lat: 40.7331,
+                lng: -73.9907,
+                address: "828 Broadway, New York, NY 10003",
+                description: "Famous for its '18 Miles of Books'.",
+                website: "https://www.strandbooks.com",
+                hasEvent: false
+            },
+            {
+                name: "McNally Jackson Books",
+                lat: 40.7209,
+                lng: -73.9973,
+                address: "52 Prince St, New York, NY 10012",
+                description: "SoHo independent with international focus.",
+                website: "https://mcnallyjackson.com",
+                hasEvent: true,
+                eventTitle: "International Literature Series",
+                eventDate: "Tuesday 8:00 PM"
+            },
+            {
+                name: "Housing Works Bookstore Cafe",
+                lat: 40.7282,
+                lng: -73.9942,
+                address: "126 Crosby St, New York, NY 10012",
+                description: "Used books supporting a great cause.",
+                website: "https://www.housingworks.org/bookstore",
+                hasEvent: false
+            },
+            {
+                name: "Harvard Book Store",
+                lat: 42.3736,
+                lng: -71.1190,
+                address: "1256 Massachusetts Ave, Cambridge, MA 02138",
+                description: "Serving Harvard Square since 1932.",
+                website: "https://www.harvard.com",
+                hasEvent: false
+            },
+            {
+                name: "Brookline Booksmith",
+                lat: 42.3318,
+                lng: -71.1211,
+                address: "279 Harvard St, Brookline, MA 02446",
+                description: "Community-focused with excellent staff picks.",
+                website: "https://brooklinebooksmith.com",
+                hasEvent: true,
+                eventTitle: "New England Authors Panel",
+                eventDate: "Next Monday 6:00 PM"
+            },
+            {
+                name: "Politics and Prose",
+                lat: 38.9595,
+                lng: -77.0645,
+                address: "5015 Connecticut Ave NW, Washington, DC 20008",
+                description: "Beloved DC bookstore with author events.",
+                website: "https://www.politics-prose.com",
+                hasEvent: true,
+                eventTitle: "Book Club Meeting",
+                eventDate: "Wednesday 7:00 PM"
+            },
+            {
+                name: "Word Bookstore",
+                lat: 40.7282,
+                lng: -73.9571,
+                address: "126 Franklin St, Brooklyn, NY 11222",
+                description: "Greenpoint's literary destination.",
+                website: "https://www.wordbookstores.com",
+                hasEvent: false
+            },
+            {
+                name: "RiverRun Bookstore",
+                lat: 43.2081,
+                lng: -71.5376,
+                address: "142 Fleet St, Portsmouth, NH 03801",
+                description: "Portsmouth's independent bookstore by the sea.",
+                website: "https://www.riverrunbookstore.com",
+                hasEvent: true,
+                eventTitle: "Coastal Writers Workshop",
+                eventDate: "Saturday 1:00 PM"
+            },
+            
+            // Additional gems across the country
+            {
+                name: "Northshire Bookstore",
+                lat: 43.1561,
+                lng: -73.0515,
+                address: "4869 Main St, Manchester, VT 05255",
+                description: "Vermont's beloved independent bookstore.",
+                website: "https://www.northshire.com",
+                hasEvent: false
+            },
+            {
+                name: "Prairie Lights",
+                lat: 41.6611,
+                lng: -91.5302,
+                address: "15 S Dubuque St, Iowa City, IA 52240",
+                description: "Iowa City's famous literary landmark.",
+                website: "https://www.prairielights.com",
+                hasEvent: true,
+                eventTitle: "Writers' Workshop Reading",
+                eventDate: "Thursday 8:00 PM"
+            },
+            {
+                name: "BookBar",
+                lat: 39.7392,
+                lng: -105.0178,
+                address: "4280 Tennyson St, Denver, CO 80212",
+                description: "Denver's bookstore and wine bar combo.",
+                website: "https://bookbardenver.com",
+                hasEvent: false
+            },
+            {
+                name: "Munro's Books",
+                lat: 48.4284,
+                lng: -123.3656,
+                address: "1108 Government St, Victoria, BC V8W 1Y2",
+                description: "Historic Canadian bookstore in beautiful Victoria.",
+                website: "https://munrobooks.com",
+                hasEvent: false
+            }
+        ];
+
+        function initializeMap() {
+            updateStatus('Initializing map...');
+            
+            try {
+                // Test if Leaflet is loaded
+                if (typeof L === 'undefined') {
+                    updateStatus('Error: Leaflet library not loaded');
+                    return;
+                }
+
+                updateStatus('Creating map...');
+                
+                // Initialize map
+                mymap = L.map('mapid', {
+                    center: [39.8283, -98.5795],
+                    zoom: 4
+                });
+
+                updateStatus('Adding map tiles...');
+
+                // Add OpenStreetMap tiles
+                var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18
+                });
+                
+                tileLayer.addTo(mymap);
+                
+                // Wait for tiles to load
+                tileLayer.on('load', function() {
+                    updateStatus('Map tiles loaded successfully!');
+                });
+                
+                tileLayer.on('tileerror', function() {
+                    updateStatus('Warning: Some map tiles failed to load');
+                });
+
+                updateStatus('Adding bookstore markers...');
+
+                // Add bookstore markers
+                addAllMarkers();
+
+                updateStatus('Map loaded successfully!');
+                
+                // Hide status after 3 seconds
+                setTimeout(function() {
+                    document.getElementById('status').style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                updateStatus('Error loading map: ' + error.message);
+            }
+        }
+
+        function addAllMarkers() {
+            // Clear existing markers
+            clearAllMarkers();
+
+            bookstores.forEach(function(store, index) {
+                try {
+                    var marker;
+                    
+                    if (store.hasEvent) {
+                        // Custom book icon with event indicator for stores with events
+                        var eventBookIcon = L.divIcon({
+                            className: 'custom-book-marker',
+                            html: '<div style="background: #e74c3c; color: white; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 3px 8px rgba(0,0,0,0.3); border: 2px solid white; position: relative;">' +
+                                  '📚' +
+                                  '<div style="position: absolute; top: -4px; right: -4px; background: #f39c12; color: white; width: 12px; height: 12px; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center;">!</div>' +
+                                  '</div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32]
+                        });
+                        
+                        marker = L.marker([store.lat, store.lng], {
+                            icon: eventBookIcon,
+                            title: store.name + ' (Has Events)'
+                        }).addTo(mymap);
+                    } else {
+                        // Custom book icon for regular stores
+                        var bookIcon = L.divIcon({
+                            className: 'custom-book-marker',
+                            html: '<div style="background: #8b4513; color: white; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.3); border: 2px solid white;">📚</div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 30]
+                        });
+                        
+                        marker = L.marker([store.lat, store.lng], {
+                            icon: bookIcon,
+                            title: store.name
+                        }).addTo(mymap);
+                    }
+
+                    // Create popup content
+                    var popupContent = '<div style="font-family: Georgia; max-width: 250px;">' +
+                        '<h3 style="color: #8b4513; margin-bottom: 8px;">' + store.name + '</h3>' +
+                        '<p style="color: #666; font-style: italic; margin-bottom: 8px;">' + store.address + '</p>' +
+                        '<p style="margin-bottom: 12px;">' + store.description + '</p>' +
+                        '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
+                        '<a href="' + store.website + '" target="_blank" style="background: #8b4513; color: white; padding: 6px 12px; text-decoration: none; border-radius: 15px; font-size: 14px;">Visit Website</a>';
+
+                    if (store.hasEvent) {
+                        popupContent += '<button onclick="alert(\'Event: ' + store.eventTitle + ' - ' + store.eventDate + '\')" style="background: #e74c3c; color: white; padding: 6px 12px; border: none; border-radius: 15px; font-size: 14px; cursor: pointer;">' + store.eventTitle + '</button>';
+                    }
+
+                    popupContent += '</div></div>';
+
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                    
+                } catch (error) {
+                    console.error('Error adding marker for', store.name, ':', error);
+                }
+            });
+        }
+
+        function clearAllMarkers() {
+            markers.forEach(function(marker) {
+                mymap.removeLayer(marker);
+            });
+            markers = [];
+        }
+
+        function performSearch() {
+            var query = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!query) {
+                alert('Please enter a city name');
+                return;
+            }
+
+            if (!mymap) {
+                alert('Map not loaded yet');
+                return;
+            }
+
+            var cities = {
+                'new york': [40.7128, -73.9355],
+                'nyc': [40.7128, -73.9355],
+                'san francisco': [37.7749, -122.4194],
+                'portland': [45.5152, -122.6784],
+                'seattle': [47.6062, -122.3321],
+                'austin': [30.2672, -97.7431],
+                'denver': [39.7392, -104.9903],
+                'boston': [42.3601, -71.0589],
+                'washington': [38.9072, -77.0369],
+                'dc': [38.9072, -77.0369]
+            };
+
+            if (cities[query]) {
+                mymap.setView(cities[query], 12);
+            } else {
+                alert('City not found. Try: New York, San Francisco, Portland, Seattle, Austin, Denver, Boston, or Washington');
+            }
+        }
+
+        function showAllStores() {
+            if (!mymap) {
+                alert('Map not loaded yet');
+                return;
+            }
+            
+            mymap.setView([39.8283, -98.5795], 4);
+            addAllMarkers();
+        }
+
+        function findNearMe() {
+            if (!mymap) {
+                alert('Map not loaded yet');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    
+                    mymap.setView([lat, lng], 12);
+                    
+                    L.marker([lat, lng])
+                        .addTo(mymap)
+                        .bindPopup('You are here!')
+                        .openPopup();
+                        
+                }, function() {
+                    alert('Unable to get your location');
+                });
+            } else {
+                alert('Geolocation not supported');
+            }
+        }
+
+        function showEventsOnly() {
+            if (!mymap) {
+                alert('Map not loaded yet');
+                return;
+            }
+
+            updateStatus('Filtering to events only...');
+            clearAllMarkers();
+            
+            var eventStores = bookstores.filter(function(store) {
+                return store.hasEvent;
+            });
+
+            if (eventStores.length === 0) {
+                alert('No events found!');
+                updateStatus('No events to show');
+                return;
+            }
+
+            eventStores.forEach(function(store) {
+                try {
+                    // Special event book marker - larger and with animation
+                    var eventBookIcon = L.divIcon({
+                        className: 'custom-event-marker',
+                        html: '<div style="background: #e74c3c; color: white; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(231,76,60,0.4); border: 2px solid white; animation: bookPulse 2s infinite; position: relative;">' +
+                              '📚' +
+                              '<div style="position: absolute; top: -6px; right: -6px; background: #f39c12; color: white; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center;">🎉</div>' +
+                              '</div>',
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 36]
+                    });
+                    
+                    var marker = L.marker([store.lat, store.lng], {
+                        icon: eventBookIcon,
+                        title: store.name + ' (Event: ' + store.eventTitle + ')'
+                    }).addTo(mymap);
+
+                    var popupContent = '<div style="font-family: Georgia; max-width: 250px;">' +
+                        '<h3 style="color: #e74c3c; margin-bottom: 8px;">🎉 ' + store.name + '</h3>' +
+                        '<p style="color: #666; font-style: italic; margin-bottom: 8px;">' + store.address + '</p>' +
+                        '<p style="margin-bottom: 12px;">' + store.description + '</p>' +
+                        '<div style="background: #ffe6e6; padding: 8px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #e74c3c;">' +
+                        '<strong style="color: #e74c3c;">📅 Event: ' + store.eventTitle + '</strong><br>' +
+                        '<small style="color: #666;">🕐 ' + store.eventDate + '</small>' +
+                        '</div>' +
+                        '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
+                        '<a href="' + store.website + '" target="_blank" style="background: #8b4513; color: white; padding: 6px 12px; text-decoration: none; border-radius: 15px; font-size: 14px;">Visit Website</a>' +
+                        '<button onclick="alert(\'Event Details:\\n' + store.eventTitle + '\\n' + store.eventDate + '\')" style="background: #e74c3c; color: white; padding: 6px 12px; border: none; border-radius: 15px; font-size: 14px; cursor: pointer;">Event Info</button>' +
+                        '</div>' +
+                        '</div>';
+
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                    
+                } catch (error) {
+                    console.error('Error adding event marker for', store.name, ':', error);
+                }
+            });
+
+            alert('Showing ' + eventStores.length + ' bookstores with events this week!');
+            updateStatus('Showing ' + eventStores.length + ' stores with events');
+            
+            // Auto zoom to show all event markers if there are any
+            if (markers.length > 0) {
+                try {
+                    var group = L.featureGroup(markers);
+                    mymap.fitBounds(group.getBounds().pad(0.1));
+                } catch (error) {
+                    console.log('Could not auto-zoom to events');
+                }
+            }
+        }
+
+        // Search on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        });
+
+        // Initialize map when page loads
+        window.addEventListener('load', function() {
+            updateStatus('Page loaded, waiting for libraries...');
+            setTimeout(function() {
+                initializeMap();
+                // Force map to resize after initialization
+                setTimeout(function() {
+                    if (mymap) {
+                        mymap.invalidateSize();
+                        updateStatus('Map resized and ready!');
+                    }
+                }, 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
