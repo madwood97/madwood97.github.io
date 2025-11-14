@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookish Author Toolkit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-nav {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-button {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid #2d5016;
+            color: #2d5016;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .nav-button.active {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .logout-button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Login */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .login-container h2 {
+            color: #2d5016;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2d5016;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .toggle-form a {
+            color: #2d5016;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Projects Grid */
+        .projects-header {
+            margin-bottom: 30px;
+        }
+
+        .projects-header h2 {
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .project-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 180px;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .project-card h3 {
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        .project-card p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .new-project-card {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 3em;
+        }
+
+        .new-project-card:hover {
+            opacity: 0.9;
+        }
+
+        .new-project-card p {
+            color: white;
+            font-size: 0.3em;
+            margin-top: 10px;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard h2 {
+            color: #2d5016;
+            margin-bottom: 20px;
+        }
+
+        .project-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-item label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .info-item input, .info-item select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .info-item input:focus, .info-item select:focus {
+            outline: none;
+            border-color: #2d5016;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #2d5016 0%, #3a3a3a 100%);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s ease;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 15px 25px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stage-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stage-section h3 {
+            color: #2d5016;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2d5016;
+        }
+
+        .item-list {
+            margin-top: 20px;
+        }
+
+        .list-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .list-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .list-item input[type="text"],
+        .list-item input[type="number"] {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .list-item input[type="text"]:focus,
+        .list-item input[type="number"]:focus {
+            outline: none;
+            border-color: #2d5016;
+        }
+
+        .list-item.completed input[type="text"] {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .list-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .upload-btn {
+            background: #2d5016;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .upload-btn:hover {
+            background: #1f3a0f;
+        }
+
+        .file-name {
+            font-size: 0.85em;
+            color: #2d5016;
+            font-style: italic;
+            cursor: pointer;
+            text-decoration: underline;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .file-name:hover {
+            color: #1f3a0f;
+        }
+
+        .add-button {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 20px;
+        }
+
+        /* Publishing Guide */
+        .guide-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .guide-header h2 {
+            color: #2d5016;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .accordion {
+            margin-bottom: 15px;
+        }
+
+        .accordion-header {
+            background: linear-gradient(135deg, #2d5016 0%, #3a3a3a 100%);
+            color: white;
+            padding: 20px 25px;
+            cursor: pointer;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .accordion-content {
+            display: none;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 0 0 10px 10px;
+            margin-top: 2px;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .tips-list {
+            list-style: none;
+        }
+
+        .tips-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .tips-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tips-list li:before {
+            content: "📚 ";
+            margin-right: 10px;
+        }
+
+        .tips-list a {
+            color: #2d5016;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .tips-list a:hover {
+            color: #1f3a0f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Bookish Author Toolkit</h1>
+            <p>Your complete toolkit for organizing and completing your book projects</p>
+        </header>
+
+        <!-- Login View -->
+        <div id="loginView" class="view active">
+            <div class="content">
+                <div class="login-container">
+                    <h2 id="formTitle">Login to Your Account</h2>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="username" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Enter password">
+                    </div>
+                    <button class="submit-button" id="authButton">Login</button>
+                    <div class="error-message" id="authError"></div>
+                    <div class="toggle-form">
+                        <span id="toggleText">Don't have an account? </span>
+                        <a id="toggleLink">Sign up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects View -->
+        <div id="projectsView" class="view">
+            <div class="main-nav">
+                <div class="nav-buttons">
+                    <button class="nav-button active" id="navMyBooks">My Books</button>
+                    <button class="nav-button" id="navPublishing">Publishing Guide</button>
+                </div>
+                <button class="logout-button" id="logoutBtn">Logout</button>
+            </div>
+            <div class="content">
+                <div class="projects-header">
+                    <h2>My Book Projects</h2>
+                    <p id="currentUser" style="color: #666;"></p>
+                </div>
+                <div class="projects-grid" id="projectsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Editor View -->
+        <div id="editorView" class="view">
+            <div class="main-nav">
+                <div class="nav-buttons">
+                    <button class="nav-button active" id="navMyBooks2">My Books</button>
+                    <button class="nav-button" id="navPublishing2">Publishing Guide</button>
+                </div>
+                <button class="logout-button" id="logoutBtn2">Logout</button>
+            </div>
+            <div class="content">
+                <button class="back-button" id="backButton">← Back to Projects</button>
+                <button class="btn-delete" id="deleteCurrentProject">Delete This Project</button>
+                <div style="clear: both;"></div>
+
+                <div class="dashboard">
+                    <h2>Project Dashboard</h2>
+                    <div class="project-info">
+                        <div class="info-item">
+                            <label>Book Title</label>
+                            <input type="text" id="bookTitle" placeholder="Enter your book title">
+                        </div>
+                        <div class="info-item">
+                            <label>Genre</label>
+                            <select id="bookGenre">
+                                <option value="">Select genre</option>
+                                <option value="Fiction">Fiction</option>
+                                <option value="Non-Fiction">Non-Fiction</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Science Fiction">Science Fiction</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Biography">Biography</option>
+                                <option value="Self-Help">Self-Help</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="info-item">
+                            <label>Target Word Count</label>
+                            <input type="number" id="targetWords" placeholder="e.g., 80000">
+                        </div>
+                        <div class="info-item">
+                            <label>Current Word Count (Auto-calculated)</label>
+                            <input type="number" id="currentWords" placeholder="0" readonly style="background-color: #f0f0f0; cursor: not-allowed;">
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Progress:</strong>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="planning">Brainstorming & Planning</button>
+                    <button class="tab-button" data-tab="drafting">Drafting</button>
+                    <button class="tab-button" data-tab="editing">Editing & Revision</button>
+                    <button class="tab-button" data-tab="finalization">Finalization</button>
+                </div>
+
+                <div id="planning" class="tab-content active">
+                    <div class="stage-section">
+                        <h3>Plot Outline</h3>
+                        <textarea id="plotOutline" placeholder="Describe your main plot points, story arc, and key events..."></textarea>
+                    </div>
+                    <div class="stage-section">
+                        <h3>Character Notes</h3>
+                        <textarea id="characterNotes" placeholder="Describe your main characters, their motivations, backgrounds, and development..."></textarea>
+                    </div>
+                    <div class="stage-section">
+                        <h3>World Building / Setting</h3>
+                        <textarea id="worldBuilding" placeholder="Describe the world, setting, time period, and important locations..."></textarea>
+                    </div>
+                </div>
+
+                <div id="drafting" class="tab-content">
+                    <div class="stage-section">
+                        <h3>Chapter Tracker</h3>
+                        <div class="item-list" id="chaptersList"></div>
+                        <button class="add-button" id="addChapterBtn">+ Add Chapter</button>
+                    </div>
+                </div>
+
+                <div id="editing" class="tab-content">
+                    <div class="stage-section">
+                        <h3>Revision Notes</h3>
+                        <textarea id="revisionNotes" placeholder="Track your revision goals, beta reader feedback, and areas that need improvement..."></textarea>
+                    </div>
+                    <div class="stage-section">
+                        <h3>Feedback Tracking</h3>
+                        <textarea id="feedbackTracking" placeholder="Record feedback from editors, beta readers, or writing groups..."></textarea>
+                    </div>
+                </div>
+
+                <div id="finalization" class="tab-content">
+                    <div class="stage-section">
+                        <h3>Final Checklist</h3>
+                        <div class="item-list" id="checklistItems"></div>
+                        <button class="add-button" id="addChecklistBtn">+ Add Checklist Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Publishing View -->
+        <div id="publishingView" class="view">
+            <div class="main-nav">
+                <div class="nav-buttons">
+                    <button class="nav-button" id="navMyBooks3">My Books</button>
+                    <button class="nav-button active" id="navPublishing3">Publishing Guide</button>
+                </div>
+                <button class="logout-button" id="logoutBtn3">Logout</button>
+            </div>
+            <div class="content">
+                <div class="guide-header">
+                    <h2>📖 Complete Publishing Guide</h2>
+                    <p>Everything you need to know about getting your book published</p>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Traditional Publishing</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="tips-list">
+                            <li>Research literary agents who represent your genre using resources like <a href="https://www.querytracker.net/" target="_blank">QueryTracker</a> or <a href="https://www.publishersmarketplace.com/" target="_blank">Publisher's Marketplace</a></li>
+                            <li>Prepare a compelling query letter that includes a hook, brief synopsis, your credentials, and word count</li>
+                            <li>Write a detailed synopsis of your book in 1-2 pages with beginning, middle, and end</li>
+                            <li>Follow submission guidelines exactly for each agent - this shows professionalism</li>
+                            <li>Expect a 6-18 month process from query to publication, sometimes longer</li>
+                            <li>Consider joining writers' organizations like <a href="https://www.scbwi.org/" target="_blank">SCBWI</a>, <a href="https://www.rwa.org/" target="_blank">RWA</a>, or <a href="https://mysterywriters.org/" target="_blank">MWA</a> for networking</li>
+                            <li>Check out <a href="https://www.writersdigest.com/" target="_blank">Writer's Digest</a> for query letter tips and agent listings</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Self-Publishing</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="tips-list">
+                            <li>Choose a platform: <a href="https://kdp.amazon.com/" target="_blank">Amazon KDP</a> offers the largest reach, <a href="https://www.ingramspark.com/" target="_blank">IngramSpark</a> for wide distribution, <a href="https://www.draft2digital.com/" target="_blank">Draft2Digital</a> for multiple retailers</li>
+                            <li>Hire professional editors - developmental editing, copy editing, and proofreading. Find editors on <a href="https://reedsy.com/" target="_blank">Reedsy</a></li>
+                            <li>Invest in professional cover design - covers sell books. Check <a href="https://99designs.com/" target="_blank">99designs</a> or <a href="https://www.fiverr.com/" target="_blank">Fiverr</a></li>
+                            <li>Format your manuscript properly for both print and digital using tools like <a href="https://vellum.pub/" target="_blank">Vellum</a> or <a href="https://www.atticus.io/" target="_blank">Atticus</a></li>
+                            <li>Obtain an ISBN from <a href="https://www.myidentifiers.com/" target="_blank">Bowker</a> - free with some platforms, or purchase your own for more control</li>
+                            <li>Set competitive pricing based on genre and length</li>
+                            <li>Join the <a href="https://www.allianceindependentauthors.org/" target="_blank">Alliance of Independent Authors</a> for support and resources</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Marketing Your Book</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="tips-list">
+                            <li>Build an author platform before launch - create a website with <a href="https://wordpress.com/" target="_blank">WordPress</a> or <a href="https://www.wix.com/" target="_blank">Wix</a> and establish social media presence</li>
+                            <li>Collect email addresses for a newsletter using <a href="https://mailchimp.com/" target="_blank">Mailchimp</a> or <a href="https://www.getresponse.com/" target="_blank">GetResponse</a></li>
+                            <li>Request honest reviews from early readers on <a href="https://www.goodreads.com/" target="_blank">Goodreads</a> and Amazon</li>
+                            <li>Consider book promotion services like <a href="https://www.bookbub.com/" target="_blank">BookBub</a>, <a href="https://www.freebooksy.com/" target="_blank">Freebooksy</a>, or <a href="https://www.bargainbooksy.com/" target="_blank">Bargain Booksy</a></li>
+                            <li>Connect with book bloggers and BookTokers in your genre</li>
+                            <li>Use design tools like <a href="https://www.canva.com/" target="_blank">Canva</a> for creating marketing materials</li>
+                            <li>Explore advertising with <a href="https://advertising.amazon.com/" target="_blank">Amazon Ads</a> or <a href="https://www.facebook.com/business/ads" target="_blank">Facebook Ads</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            user: null,
+            projectId: null,
+            isSignup: false
+        };
+
+        // Initialize
+        (function() {
+            const user = localStorage.getItem('loggedInUser');
+            if (user) {
+                state.user = user;
+                showView('projectsView');
+                loadProjects();
+            }
+
+            // Auth
+            document.getElementById('authButton').onclick = handleAuth;
+            document.getElementById('toggleLink').onclick = toggleAuthForm;
+            
+            // Logout
+            document.getElementById('logoutBtn').onclick = logout;
+            document.getElementById('logoutBtn2').onclick = logout;
+            document.getElementById('logoutBtn3').onclick = logout;
+
+            // Navigation
+            document.getElementById('navMyBooks').onclick = () => showView('projectsView');
+            document.getElementById('navMyBooks2').onclick = () => showView('projectsView');
+            document.getElementById('navMyBooks3').onclick = () => showView('projectsView');
+            document.getElementById('navPublishing').onclick = () => showView('publishingView');
+            document.getElementById('navPublishing2').onclick = () => showView('publishingView');
+            document.getElementById('navPublishing3').onclick = () => showView('publishingView');
+            
+            document.getElementById('backButton').onclick = () => {
+                state.projectId = null;
+                showView('projectsView');
+                loadProjects();
+            };
+
+            document.getElementById('deleteCurrentProject').onclick = () => {
+                if (state.projectId) {
+                    deleteProject(state.projectId);
+                    state.projectId = null;
+                    showView('projectsView');
+                    loadProjects();
+                }
+            };
+
+            // Editor inputs
+            document.getElementById('bookTitle').oninput = e => saveField('title', e.target.value);
+            document.getElementById('bookGenre').onchange = e => saveField('genre', e.target.value);
+            document.getElementById('targetWords').oninput = e => { saveField('targetWords', e.target.value); updateProgress(); };
+
+            // Tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.onclick = function() {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                };
+            });
+
+            // Accordion
+            document.querySelectorAll('.accordion-header').forEach(h => {
+                h.onclick = function() {
+                    const content = this.nextElementSibling;
+                    const arrow = this.querySelector('span:last-child');
+                    content.classList.toggle('active');
+                    arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
+                };
+            });
+
+            // Chapters and checklist
+            document.getElementById('addChapterBtn').onclick = addChapter;
+            document.getElementById('addChecklistBtn').onclick = addChecklistItem;
+        })();
+
+        function toggleAuthForm() {
+            state.isSignup = !state.isSignup;
+            document.getElementById('formTitle').textContent = state.isSignup ? 'Create New Account' : 'Login to Your Account';
+            document.getElementById('authButton').textContent = state.isSignup ? 'Sign Up' : 'Login';
+            document.getElementById('toggleText').textContent = state.isSignup ? 'Already have an account? ' : "Don't have an account? ";
+            document.getElementById('toggleLink').textContent = state.isSignup ? 'Login' : 'Sign up';
+            document.getElementById('authError').textContent = '';
+        }
+
+        function handleAuth() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                document.getElementById('authError').textContent = 'Please fill in all fields';
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (state.isSignup) {
+                if (users[username]) {
+                    document.getElementById('authError').textContent = 'Username already exists';
+                    return;
+                }
+                users[username] = password;
+                localStorage.setItem('users', JSON.stringify(users));
+            } else {
+                if (!users[username] || users[username] !== password) {
+                    document.getElementById('authError').textContent = 'Invalid username or password';
+                    return;
+                }
+            }
+
+            state.user = username;
+            localStorage.setItem('loggedInUser', username);
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showView('projectsView');
+            loadProjects();
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            state.user = null;
+            state.projectId = null;
+            showView('loginView');
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function loadProjects() {
+            document.getElementById('currentUser').textContent = `Welcome, ${state.user}!`;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = '';
+
+            // New project card
+            const newCard = document.createElement('div');
+            newCard.className = 'project-card new-project-card';
+            newCard.innerHTML = '<div>+</div><p>Create New Book</p>';
+            newCard.onclick = createNewProject;
+            grid.appendChild(newCard);
+
+            // Existing projects
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.style.cursor = 'pointer';
+                
+                card.innerHTML = `
+                    <h3>${p.title || 'Untitled Book'}</h3>
+                    <p><strong>Genre:</strong> ${p.genre || 'Not set'}</p>
+                    <p><strong>Progress:</strong> ${p.currentWords || 0} / ${p.targetWords || 0} words</p>
+                    <p><strong>Last updated:</strong> ${new Date(p.lastUpdated).toLocaleDateString()}</p>
+                `;
+                
+                card.onclick = () => openProject(p.id);
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function createNewProject() {
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const newProject = {
+                id: Date.now().toString(),
+                title: '',
+                genre: '',
+                targetWords: 0,
+                currentWords: 0,
+                plotOutline: '',
+                characterNotes: '',
+                worldBuilding: '',
+                chapters: [],
+                revisionNotes: '',
+                feedbackTracking: '',
+                checklist: [
+                    { text: 'Proofread complete', completed: false },
+                    { text: 'Cover design finalized', completed: false },
+                    { text: 'ISBN obtained', completed: false },
+                    { text: 'Copyright registered', completed: false },
+                    { text: 'Book description written', completed: false },
+                    { text: 'Author bio prepared', completed: false }
+                ],
+                lastUpdated: Date.now()
+            };
+            projects.push(newProject);
+            localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+            openProject(newProject.id);
+        }
+
+        function deleteProject(id) {
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const filtered = projects.filter(p => p.id !== id);
+            localStorage.setItem(`projects_${state.user}`, JSON.stringify(filtered));
+            loadProjects();
+        }
+
+        function openProject(id) {
+            state.projectId = id;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === id);
+            if (!p) return;
+
+            document.getElementById('bookTitle').value = p.title || '';
+            document.getElementById('bookGenre').value = p.genre || '';
+            document.getElementById('targetWords').value = p.targetWords || '';
+            document.getElementById('currentWords').value = p.currentWords || '';
+            document.getElementById('plotOutline').value = p.plotOutline || '';
+            document.getElementById('characterNotes').value = p.characterNotes || '';
+            document.getElementById('worldBuilding').value = p.worldBuilding || '';
+            document.getElementById('revisionNotes').value = p.revisionNotes || '';
+            document.getElementById('feedbackTracking').value = p.feedbackTracking || '';
+
+            renderChapters(p.chapters || []);
+            renderChecklist(p.checklist || []);
+            updateProgress();
+            showView('editorView');
+        }
+
+        function saveField(field, value) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                p[field] = value;
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+            }
+        }
+
+        function updateProgress() {
+            const current = parseInt(document.getElementById('currentWords').value) || 0;
+            const target = parseInt(document.getElementById('targetWords').value) || 1;
+            const percent = Math.min(Math.round((current / target) * 100), 100);
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressBar').textContent = percent + '%';
+        }
+
+        function recalculateWordCount() {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                const total = p.chapters.reduce((sum, ch) => sum + (parseInt(ch.wordCount) || 0), 0);
+                p.currentWords = total;
+                document.getElementById('currentWords').value = total;
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                updateProgress();
+            }
+        }
+
+        function addChapter() {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                p.chapters = p.chapters || [];
+                p.chapters.push({ title: '', wordCount: 0, fileName: '', fileData: '' });
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                renderChapters(p.chapters);
+            }
+        }
+
+        function renderChapters(chapters) {
+            const list = document.getElementById('chaptersList');
+            list.innerHTML = chapters.length === 0 ? '<p style="color:#666">No chapters yet</p>' : '';
+            chapters.forEach((ch, i) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                
+                const titleIn = document.createElement('input');
+                titleIn.type = 'text';
+                titleIn.placeholder = `Chapter ${i + 1} title`;
+                titleIn.value = ch.title || '';
+                titleIn.style.flex = '2';
+                titleIn.style.minWidth = '200px';
+                titleIn.onchange = function() {
+                    updateChapter(i, 'title', this.value);
+                };
+                
+                const wordIn = document.createElement('input');
+                wordIn.type = 'number';
+                wordIn.placeholder = 'Word Count';
+                wordIn.value = ch.wordCount || '';
+                wordIn.style.width = '120px';
+                wordIn.onchange = function() {
+                    updateChapter(i, 'wordCount', this.value);
+                    recalculateWordCount();
+                };
+                
+                const uploadBtn = document.createElement('button');
+                uploadBtn.textContent = 'Upload PDF';
+                uploadBtn.className = 'upload-btn';
+                uploadBtn.onclick = () => {
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.pdf';
+                    fileInput.onchange = (e) => handleFileUpload(e, i);
+                    fileInput.click();
+                };
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = () => {
+                    removeChapter(i);
+                    recalculateWordCount();
+                };
+                
+                div.appendChild(titleIn);
+                div.appendChild(wordIn);
+                div.appendChild(uploadBtn);
+                div.appendChild(removeBtn);
+                
+                if (ch.fileName) {
+                    const fileName = document.createElement('span');
+                    fileName.className = 'file-name';
+                    fileName.textContent = `📄 ${ch.fileName} (click to open)`;
+                    fileName.onclick = () => openFile(i);
+                    div.appendChild(fileName);
+                }
+                
+                list.appendChild(div);
+            });
+        }
+
+        function updateChapter(idx, field, val) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p && p.chapters[idx]) {
+                p.chapters[idx][field] = val;
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+            }
+        }
+
+        function removeChapter(idx) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                p.chapters.splice(idx, 1);
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                renderChapters(p.chapters);
+            }
+        }
+
+        function handleFileUpload(event, chapterIndex) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (!state.projectId) return;
+                const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+                const p = projects.find(pr => pr.id === state.projectId);
+                
+                if (p && p.chapters[chapterIndex]) {
+                    p.chapters[chapterIndex].fileName = file.name;
+                    p.chapters[chapterIndex].fileData = e.target.result;
+                    p.lastUpdated = Date.now();
+                    localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                    renderChapters(p.chapters);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openFile(chapterIndex) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            
+            if (p && p.chapters[chapterIndex] && p.chapters[chapterIndex].fileData) {
+                const chapter = p.chapters[chapterIndex];
+                
+                const byteString = atob(chapter.fileData.split(',')[1]);
+                const mimeString = chapter.fileData.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                
+                const url = URL.createObjectURL(blob);
+                const newWindow = window.open(url, '_blank');
+                
+                if (!newWindow) {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = chapter.fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+                
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+        }
+
+        function addChecklistItem() {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                p.checklist = p.checklist || [];
+                p.checklist.push({ text: '', completed: false });
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                renderChecklist(p.checklist);
+            }
+        }
+
+        function renderChecklist(items) {
+            const list = document.getElementById('checklistItems');
+            list.innerHTML = items.length === 0 ? '<p style="color:#666">No items yet</p>' : '';
+            items.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'list-item' + (item.completed ? ' completed' : '');
+                
+                const check = document.createElement('input');
+                check.type = 'checkbox';
+                check.checked = item.completed;
+                check.onchange = () => updateChecklistItem(i, 'completed', check.checked);
+                
+                const textIn = document.createElement('input');
+                textIn.type = 'text';
+                textIn.placeholder = 'Item description';
+                textIn.value = item.text || '';
+                textIn.onchange = () => updateChecklistItem(i, 'text', textIn.value);
+                
+                const btn = document.createElement('button');
+                btn.textContent = 'Remove';
+                btn.onclick = () => removeChecklistItem(i);
+                
+                div.appendChild(check);
+                div.appendChild(textIn);
+                div.appendChild(btn);
+                list.appendChild(div);
+            });
+        }
+
+        function updateChecklistItem(idx, field, val) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p && p.checklist[idx]) {
+                p.checklist[idx][field] = val;
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                renderChecklist(p.checklist);
+            }
+        }
+
+        function removeChecklistItem(idx) {
+            if (!state.projectId) return;
+            const projects = JSON.parse(localStorage.getItem(`projects_${state.user}`) || '[]');
+            const p = projects.find(pr => pr.id === state.projectId);
+            if (p) {
+                p.checklist.splice(idx, 1);
+                p.lastUpdated = Date.now();
+                localStorage.setItem(`projects_${state.user}`, JSON.stringify(projects));
+                renderChecklist(p.checklist);
+            }
+        }
+    </script>
+</body>
+</html>
